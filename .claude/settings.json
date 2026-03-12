@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/session-start.js\""
+          }
+        ],
+        "description": "Load previous session context, detect project type (FastAPI + Next.js) and package manager on new session"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/auto-tmux-dev.js\""
+          }
+        ],
+        "description": "Intercept dev server commands (pnpm dev, npm run dev) and open them in a new cmd window on Windows so they don't block Claude"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/pre-bash-git-push-reminder.js\""
+          }
+        ],
+        "description": "Log a reminder before git push to review changes"
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/doc-file-warning.js\""
+          }
+        ],
+        "description": "Warn when Claude writes non-standard documentation files outside docs/ or README.md"
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/suggest-compact.js\""
+          }
+        ],
+        "description": "Suggest manual /compact at logical phase transitions (every 50 tool calls, then every 25)"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/quality-gate.js\"",
+            "async": true,
+            "timeout": 30
+          }
+        ],
+        "description": "Quality gate: ruff for .py (FastAPI), Prettier/Biome for .ts/.tsx/.js (Next.js). Set ECC_QUALITY_GATE_FIX=true to auto-fix"
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/post-edit-format.js\""
+          }
+        ],
+        "description": "Auto-format .ts/.tsx/.js/.jsx files after edits (auto-detects Biome or Prettier)"
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/post-edit-typecheck.js\""
+          }
+        ],
+        "description": "TypeScript type-check after editing .ts/.tsx files — finds nearest tsconfig.json and runs tsc --noEmit"
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/post-edit-console-warn.js\""
+          }
+        ],
+        "description": "Warn with line numbers when console.log is found in the just-edited JS/TS file"
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/pre-compact.js\""
+          }
+        ],
+        "description": "Save state marker to ~/.claude/sessions/ before context compaction so session continuity is preserved"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/check-console-log.js\""
+          }
+        ],
+        "description": "After each response, scan all git-modified JS/TS files for console.log statements"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/session-end.js\"",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Persist session state (tasks, files modified, tools used) to ~/.claude/sessions/ after each response"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"D:/hammad/startup/nearme/.claude/hooks/cost-tracker.js\"",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Track token count and estimated USD cost per session to ~/.claude/metrics/costs.jsonl"
+      }
+    ]
+  },
+  "env": {
+    "ENABLE_TOOL_SEARCH": "auto:5"
+  }
+}

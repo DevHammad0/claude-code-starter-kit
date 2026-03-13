@@ -3,8 +3,8 @@
 ## Entry Points
 ```bash
 # Replace with your actual commands
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ## Key Rules
